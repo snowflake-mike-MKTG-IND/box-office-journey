@@ -46,16 +46,4 @@ else:
                      "New films appear here automatically once they're scored and the data is "
                      "refreshed. Each gets the same base case + breakout odds + bear/base/bull range.")
 
-theme.section("Every prediction", "Search and sort the full history.")
-show = hist.copy()
-show["Breakout %"] = (show["P_LARGE"] * 100).round().astype(int)
-for col, src in [("Predicted $M", "BASE_OW"), ("Actual $M", "ACTUAL_OW"),
-                 ("Bear $M", "BEAR_OW"), ("Bull $M", "BULL_OW")]:
-    show[col] = (show[src] / 1e6).round(1)
-st.dataframe(
-    show[["MOVIE_TITLE", "RELEASE_DATE", "PRED_TIER", "ACTUAL_TIER", "Breakout %",
-          "Predicted $M", "Actual $M", "Bear $M", "Bull $M", "TIER_HIT"]]
-    .rename(columns={"MOVIE_TITLE": "Film", "RELEASE_DATE": "Released", "PRED_TIER": "Predicted tier",
-                     "ACTUAL_TIER": "Actual tier", "TIER_HIT": "Tier correct"}),
-    use_container_width=True, hide_index=True, height=420)
 st.page_link("pages/5_Behind_the_Scenes.py", label="Next: Behind the Scenes \u2192")
