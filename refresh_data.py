@@ -44,7 +44,9 @@ MILESTONES = [
 
 def main():
     conn = snowflake.connector.connect(connection_name=os.getenv("SNOWFLAKE_CONNECTION_NAME") or "demo_mktadv_kp")
-    df = pd.read_sql("SELECT * FROM SPARK_PAR_DEMO.PRODUCTION.OW_PREDICTION_V28_HISTORICAL", conn)
+    # Only pure model OOF predictions + live upcoming. Manual-override / excluded rows are dropped.
+    df = pd.read_sql("SELECT * FROM SPARK_PAR_DEMO.PRODUCTION.OW_PREDICTION_V28_HISTORICAL "
+                     "WHERE PREDICTION_TYPE IN ('OOF_BACKTEST', 'UPCOMING')", conn)
     conn.close()
     df.columns = [c.upper() for c in df.columns]
     df.to_csv(os.path.join(DATA, "predictions_v28.csv"), index=False)
