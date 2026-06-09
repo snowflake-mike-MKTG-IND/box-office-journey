@@ -1,0 +1,22 @@
+[
+  {
+    "bucket": "Under 15%",
+    "n": 198,
+    "actual_breakout_rate": 1
+  },
+  {
+    "bucket": "15-30% (~1 in 5)",
+    "n": 24,
+    "actual_breakout_rate": 17
+  },
+  {
+    "bucket": "30-50% (~1 in 3)",
+    "n": 23,
+    "actual_breakout_rate": 39
+  },
+  {
+    "bucket": "Over 50%",
+    "n": 46,
+    "actual_breakout_rate": 87
+  }
+]

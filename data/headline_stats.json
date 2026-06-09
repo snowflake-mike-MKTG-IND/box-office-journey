@@ -1,0 +1,14 @@
+{
+  "n_films": 291,
+  "tier_accuracy": 74.6,
+  "mae_millions": 11.26,
+  "n_breakouts": 55,
+  "breakout_flags": 31,
+  "missed_breakouts": 21,
+  "flag_catches_missed": 15,
+  "flag_recall_pct": 71,
+  "date_min": "2022-01-07",
+  "date_max": "2026-06-05",
+  "start_accuracy": 58.1,
+  "start_mae": 16.8
+}

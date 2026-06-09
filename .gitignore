@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.DS_Store
+
+# Local secrets / connections (never commit)
+.streamlit/secrets.toml
+*.key
+*.p8
+service-account*.json
+
+# Scratch
+/tmp/

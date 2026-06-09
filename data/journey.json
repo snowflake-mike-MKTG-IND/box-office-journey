@@ -1,0 +1,103 @@
+{
+  "climb": [
+    {
+      "version": "V2",
+      "date": "2026-02-15",
+      "accuracy": 58.1,
+      "mae": 16.8,
+      "label": "First real features",
+      "note": "Rolling search-trend windows. A coin-flip-plus starting point."
+    },
+    {
+      "version": "V5",
+      "date": "2026-02-15",
+      "accuracy": 63.5,
+      "mae": 15.1,
+      "label": "Audience intent",
+      "note": "YouTube trailer intent + star power added."
+    },
+    {
+      "version": "V10",
+      "date": "2026-02-15",
+      "accuracy": 67.8,
+      "mae": 14.0,
+      "label": "Tiered structure",
+      "note": "Predict the size class first, then the dollars."
+    },
+    {
+      "version": "V14",
+      "date": "2026-02-27",
+      "accuracy": 71.5,
+      "mae": 13.1,
+      "label": "Production pipeline",
+      "note": "Three clean tiers: Small / Mid / Large+."
+    },
+    {
+      "version": "V15",
+      "date": "2026-03-08",
+      "accuracy": 77.3,
+      "mae": 11.0,
+      "label": "Data quality leap",
+      "note": "Cleaner inputs; biggest single jump."
+    },
+    {
+      "version": "V18",
+      "date": "2026-04-21",
+      "accuracy": 77.2,
+      "mae": 10.96,
+      "label": "Wikipedia interest",
+      "note": "A third public demand signal joins search + social."
+    },
+    {
+      "version": "V22c",
+      "date": "2026-05-12",
+      "accuracy": 78.5,
+      "mae": 9.21,
+      "label": "Rule era peak",
+      "note": "Hand-tuned rules squeezed error down -- but on hindsight knowledge."
+    },
+    {
+      "version": "V27",
+      "date": "2026-06-05",
+      "accuracy": 79.5,
+      "mae": 10.3,
+      "label": "Modern ensemble",
+      "note": "Tuned gradient boosting + a foundation model, no hand rules."
+    },
+    {
+      "version": "V28-A",
+      "date": "2026-06-08",
+      "accuracy": 77.0,
+      "mae": 10.0,
+      "label": "Honest & rule-free",
+      "note": "Learns how to combine signals instead of hand-coded rules. The base for the odds reframe."
+    }
+  ],
+  "milestones": [
+    {
+      "act": "The Question",
+      "title": "Can you call it before it opens?",
+      "body": "Predict a movie's opening weekend using only signals available before release -- and without the ticket pre-sales or paid survey tracking the industry leans on."
+    },
+    {
+      "act": "The Climb",
+      "title": "From a coin flip to the high 70s",
+      "body": "Better public signals (search, trailer reaction, Wikipedia) and a smarter structure pushed accuracy from 58% to the high-70s and cut the typical miss from ~$17M to ~$10M."
+    },
+    {
+      "act": "The Wall",
+      "title": "Accuracy stopped climbing -- and we learned why",
+      "body": "A handful of films open far bigger than anything about them beforehand suggests. We proved mathematically that these breakouts sit at an irreducible 'noise floor': two films that look identical can open $50M apart."
+    },
+    {
+      "act": "The Reframe",
+      "title": "Stop guessing the number. Tell the odds.",
+      "body": "The model already 'knew' these films were risky -- it gave them real breakout probability. We surfaced that: most-likely number, PLUS a calibrated chance of a breakout."
+    },
+    {
+      "act": "Today",
+      "title": "An honest prediction you can plan around",
+      "body": "Every film gets a base case, a breakout probability, and a bear / base / bull range -- calibrated so '1 in 3' really happens about 1 in 3 times."
+    }
+  ]
+}
