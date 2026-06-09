@@ -30,6 +30,19 @@ streamlit run app.py
 ```
 The app reads only the bundled snapshot in `data/` — no database connection required.
 
+## Deploy to Streamlit Community Cloud
+1. Go to [share.streamlit.io](https://share.streamlit.io) and sign in with the GitHub account that
+   owns this repo (`snowflake-mike-MKTG-IND`).
+2. **New app** \u2192 **Deploy from existing repo**:
+   - Repository: `snowflake-mike-MKTG-IND/box-office-journey`
+   - Branch: `main`
+   - Main file path: `app.py`
+3. Click **Deploy**. No secrets are needed \u2014 the app reads only the bundled `data/` snapshot.
+4. Copy the resulting URL into the **Live app** link at the top of this README.
+
+Because the repo is private, authorize Streamlit's GitHub access when prompted. Every push to `main`
+(including refreshed `data/`) auto-redeploys.
+
 ## Refresh the data (maintainers)
 `refresh_data.py` regenerates the bundled snapshot from Snowflake (run locally, with a configured
 `demo_mktadv_kp` connection), then commit the updated `data/` files — Streamlit Cloud auto-deploys.
