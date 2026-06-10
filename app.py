@@ -8,7 +8,7 @@ s = dataio.stats()
 
 theme.hero(
     "Can you call a movie's opening weekend before it opens?",
-    "A six-month journey building an honest box-office prediction model on Snowflake \u2014 "
+    "A spare-time project built across six months \u2014 an honest box-office prediction model on Snowflake, "
     "and what we learned when accuracy hit a wall.",
 )
 
