@@ -42,14 +42,99 @@ MILESTONES = [
 ]
 
 
+SIGNAL_COLS = [
+    "BUDGET", "TMDB_POPULARITY", "YT_COMMENTS", "KNOWN_IP_TIER",
+    "ROLLING_7D", "ROLLING_3D", "ROLLING_14D", "VELOCITY_7D", "TRENDS_PEAK_SO_FAR",
+    "MAX_STAR_POWER", "TOP2_STAR_POWER", "AVG_STAR_POWER",
+    "PREDECESSOR_OW_LOG", "THEATRICAL_INTENT_PCT",
+]
+
+WIKI_COLS = [
+    "WIKI_ROLLING_7D", "WIKI_ROLLING_14D", "WIKI_PEAK", "WIKI_CUMULATIVE",
+    "WIKI_VELOCITY_7D",
+]
+
+
+def export_upcoming_features(conn, upcoming_ids):
+    """Export feature data for upcoming movies + percentile ranks vs training set."""
+    if not len(upcoming_ids):
+        return pd.DataFrame()
+
+    # Get model_version -> days_out mapping for each upcoming movie
+    up_meta = pd.read_sql(
+        "SELECT MOVIE_ID, MODEL_VERSION FROM SPARK_PAR_DEMO.PRODUCTION.OW_PREDICTION_V28_HISTORICAL "
+        "WHERE PREDICTION_TYPE = 'UPCOMING'", conn)
+    up_meta.columns = [c.upper() for c in up_meta.columns]
+    # Parse days_out from MODEL_VERSION (e.g. V28-A@D7 -> -7)
+    def parse_horizon(mv):
+        if pd.isna(mv): return -7
+        if '@D3' in str(mv): return -3
+        if '@D7' in str(mv): return -7
+        if '@D14' in str(mv): return -14
+        return -7
+    up_meta['DAYS_OUT'] = up_meta['MODEL_VERSION'].apply(parse_horizon)
+
+    # Build per-movie queries
+    conditions = " OR ".join(
+        f"(f.MOVIE_ID={int(row.MOVIE_ID)} AND f.DAYS_OUT={int(row.DAYS_OUT)})"
+        for _, row in up_meta.iterrows()
+    )
+    feat_cols = ", ".join(["f.MOVIE_ID", "f.MOVIE_TITLE", "f.DAYS_OUT"] + [f"f.{c}" for c in SIGNAL_COLS])
+    wiki_cols = ", ".join([f"COALESCE(w.{c}, 0) AS {c}" for c in WIKI_COLS])
+
+    sql = f"""
+        SELECT {feat_cols}, {wiki_cols}
+        FROM SPARK_PAR_DEMO.PRODUCTION.OW_PREDICTION_FEATURES_V f
+        LEFT JOIN SPARK_PAR_DEMO.PRODUCTION.WIKIPEDIA_FEATURES_V w
+            ON f.MOVIE_ID = w.MOVIE_ID AND f.DAYS_OUT = w.DAYS_OUT
+        WHERE {conditions}
+    """
+    uf = pd.read_sql(sql, conn)
+    uf.columns = [c.upper() for c in uf.columns]
+
+    # Get training set features at D-7 for percentile context
+    all_cols = SIGNAL_COLS + WIKI_COLS
+    train_cols = ", ".join([f"f.{c}" for c in SIGNAL_COLS] + [f"COALESCE(w.{c}, 0) AS {c}" for c in WIKI_COLS])
+    train_sql = f"""
+        SELECT {train_cols}
+        FROM SPARK_PAR_DEMO.PRODUCTION.OW_PREDICTION_FEATURES_V f
+        LEFT JOIN SPARK_PAR_DEMO.PRODUCTION.WIKIPEDIA_FEATURES_V w
+            ON f.MOVIE_ID = w.MOVIE_ID AND f.DAYS_OUT = w.DAYS_OUT
+        WHERE f.DAYS_OUT = -7 AND f.OPENING_WEEKEND IS NOT NULL
+    """
+    train = pd.read_sql(train_sql, conn)
+    train.columns = [c.upper() for c in train.columns]
+
+    # Compute percentile ranks for each signal
+    for col in all_cols:
+        if col in uf.columns and col in train.columns:
+            vals = train[col].dropna().values
+            if len(vals) > 0:
+                uf[f"{col}_PCTL"] = uf[col].apply(
+                    lambda x: int(np.searchsorted(np.sort(vals), x) / len(vals) * 100) if pd.notna(x) else 0
+                )
+            else:
+                uf[f"{col}_PCTL"] = 0
+
+    return uf
+
+
 def main():
     conn = snowflake.connector.connect(connection_name=os.getenv("SNOWFLAKE_CONNECTION_NAME") or "demo_mktadv_kp")
     # Only pure model OOF predictions + live upcoming. Manual-override / excluded rows are dropped.
     df = pd.read_sql("SELECT * FROM SPARK_PAR_DEMO.PRODUCTION.OW_PREDICTION_V28_HISTORICAL "
                      "WHERE PREDICTION_TYPE IN ('OOF_BACKTEST', 'UPCOMING')", conn)
-    conn.close()
     df.columns = [c.upper() for c in df.columns]
     df.to_csv(os.path.join(DATA, "predictions_v28.csv"), index=False)
+
+    # Export upcoming features with percentile context
+    upcoming_ids = df[df["PREDICTION_TYPE"] == "UPCOMING"]["MOVIE_ID"].tolist()
+    uf = export_upcoming_features(conn, upcoming_ids)
+    if len(uf):
+        uf.to_csv(os.path.join(DATA, "upcoming_features.csv"), index=False)
+        print(f"  upcoming_features.csv: {len(uf)} rows, {len(uf.columns)} cols")
+
+    conn.close()
 
     # headline stats + calibration are computed over the leak-safe BACKTEST only.
     # Upcoming rows (null actuals) are in the CSV for the live tracker but excluded from scoring metrics.

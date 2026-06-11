@@ -26,3 +26,13 @@ def stats() -> dict:
 @st.cache_data
 def calibration() -> list:
     return json.load(open(os.path.join(_DATA, "calibration.json")))
+
+
+@st.cache_data
+def upcoming_features() -> pd.DataFrame:
+    path = os.path.join(_DATA, "upcoming_features.csv")
+    if not os.path.exists(path):
+        return pd.DataFrame()
+    df = pd.read_csv(path)
+    df.columns = [c.upper() for c in df.columns]
+    return df
